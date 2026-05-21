@@ -1,0 +1,40 @@
+name: Build for MIPS (Keenetic)
+
+# Запускать, когда мы создаем тег версии, например "v1.0.0"
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Виртуальный компьютер для сборки
+    steps:
+      # Шаг 1: Скачиваем наш код
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive' # Важно! Загружаем и под-модули
+
+      # Шаг 2: Устанавливаем Go нужной версии
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22' # Можно заменить на '1.26', если нужно
+
+      # Шаг 3: Устанавливаем mage (систему сборки)
+      - name: Install mage
+        run: go install github.com/magefile/mage@latest
+
+      # Шаг 4: Запускаем сборку с командами, которые мы обсуждали
+      - name: Build for MIPS
+        run: |
+          # Эти переменные окружения и есть кросс-компиляция
+          CGO_ENABLED=0 GOOS=linux GOARCH=mips GOMIPS=softfloat mage build
+
+      # Шаг 5: Загружаем результат, чтобы его можно было скачать
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: olcrtc-mips-keenetic # Имя zip-архива с файлом
+          path: build/olcrtc-linux-mips* # Забираем то, что соберется
