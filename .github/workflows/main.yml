@@ -1,10 +1,10 @@
 name: Build for MIPS (Keenetic)
 
-# Запускать, когда мы создаем тег версии, например "v1.0.0"
+# Запускать при каждом пуше и по требованию, для теста
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ "master", "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
